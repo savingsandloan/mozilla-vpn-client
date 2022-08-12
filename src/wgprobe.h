@@ -12,8 +12,10 @@ class WgProbe : QObject{
   Q_DISABLE_COPY_MOVE(WgProbe)
 
  public:
-   static bool probeHop(const HopConnection& hop);
+   
+   static void onHandshakeFailed(const HopConnection& hop);
 
+   static bool probeHop(const HopConnection& hop);
 
    static constexpr auto BACKOFF_TIME = 300;
 };

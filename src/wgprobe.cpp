@@ -5,6 +5,7 @@
 #include "wgprobe.h"
 #include "probe.h"
 #include "logger.h"
+#include "settingsholder.h"
 #include "mozillavpn.h"
 
 
@@ -61,4 +62,51 @@ bool WgProbe::probeHop(const HopConnection& hop){
     return true;  
   }
   return result == ProbeResult::Ok;
+}
+
+
+/**
+ * @brief Should be called once a handshake failed. It will try to collect diagnostic information
+ *        about the failure. For now we will report those to glean, so we can investigate possible soloution spaces.
+ *
+ * @param hop The Hop we were unable to connect to
+ */
+void WgProbe::onHandshakeFailed(const HopConnection& hop){
+  if(!SettingsHolder::instance()->gleanEnabled()){
+    // If glean is disabled, we don't need to do anything
+    return;
+  }
+
+  // Question 1: Can we ping the server?
+  bool chosen_server_pingable = false;
+
+  // Question 2: if the Server is not pingable, could we reach a random server in a diffrent 
+  // Computer server?
+  bool random_other_server_pingable = false;
+
+  // Question 2: Can we do a handshake using boring tun? 
+  bool bt_handshake = WgProbe::probeHop(hop);
+  bool bt_handshake_with_dns_port = false;
+
+  // Question 3: Could we do a handshake using a diffrent port?
+  if(!bt_handshake){
+    // Note: if we have succceeded on the handshake, we should not retry, 
+    // as the handshake is rate-limited to once every 5s if it is successfull (to prevent ddos)
+    auto alt_hop = hop;
+    alt_hop.m_server.forcePort(53);
+    bt_handshake_with_dns_port = WgProbe::probeHop(alt_hop);
+  }
+
+  // Question 4: Could we connect to the alternative server? 
+  // Todo: do that.
+
+
+
+  MozillaVPN::recordGleanEventWithExtraKeys("wireguard_probe_result",{
+    {"isRandomPingable",random_other_server_pingable}
+    {"isPingable", chosen_server_pingable},
+    {"successfullHandshake", bt_handshake},
+    {"successfullDNSOption", bt_handshake_with_dns_port}
+  });
+
 }

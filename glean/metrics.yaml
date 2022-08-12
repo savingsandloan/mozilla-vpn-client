@@ -784,6 +784,39 @@ sample:
         description: |
           The sku of the started Subscription
         type: string
+  
+  wireguard_probe_result:
+    type: event
+    lifetime: ping
+    send_in_pings:
+      - main
+    description: |
+      Contains technical information why a wireguard handshake could 
+      have failed and what possible soloutions exist.
+    bugs:
+      - https://github.com/mozilla-mobile/mozilla-vpn-client/issues/2956
+    data_reviews:
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1759345
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1774433
+    data_sensitivity:
+      - interaction
+    notification_emails:
+      - amarchesini@mozilla.com
+    expires: never
+    extra_keys:
+      isPingable:
+        description: |
+          Is true if the selected server was reachable via an icmp ping
+        type: bool
+      successfullHandshake:
+        description: |
+          Is true if the selected server could be reached using internal wireguard-test
+        type: bool
+      successfullDNSOption:
+        description: |
+          Is true if the selected server could be reached after choosing "port 53 dns"
+        type: bool
+        
 
   iap_restore_sub_started:
     type: event
