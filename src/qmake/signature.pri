@@ -10,10 +10,10 @@ macos|win* {
     }
 
     signatureCrate.input = SIGNATURE_CRATE
-    signatureCrate.output = ${QMAKE_FILE_IN}/target/release/$$LIBNAME
+    signatureCrate.output = ${QMAKE_FILE_IN}/target/x86_64-apple-darwin/release/$$LIBNAME
     signatureCrate.commands = @echo Building signature rust create staticlib \
         && cd ${QMAKE_FILE_IN} \
-        && cargo build --release
+        && cargo build --release --target x86_64-apple-darwin
     signatureCrate.clean = ${QMAKE_FILE_OUT}
     signatureCrate.CONFIG = target_predeps
     signatureCrate.depends += ${QMAKE_FILE_IN}/Cargo.toml ${QMAKE_FILE_IN}/src/lib.rs

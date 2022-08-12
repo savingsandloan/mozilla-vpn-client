@@ -34,6 +34,15 @@
 #  include "platforms/dummy/dummycontroller.h"
 #endif
 
+
+# include "wgprobe.h"
+#ifdef MVPN_WIREGUARD_PROBE
+
+#include <chrono>
+#include <thread>
+
+#endif
+
 constexpr const uint32_t TIMER_MSEC = 1000;
 
 // X connection retries.
@@ -271,7 +280,18 @@ void Controller::activateInternal() {
   }
 
   m_activationQueue.append(exitHop);
-  activateNext();
+
+  #ifdef MVPN_WIREGUARD_PROBE
+    auto ok =  WgProbe::probeHop(m_activationQueue.first());
+    if(ok){
+      std::this_thread::sleep_for(std::chrono::milliseconds(7000));
+      activateNext();
+      return;
+    }
+    deactivate(); 
+  #else 
+    activateNext();
+  #endif
 }
 
 void Controller::activateNext() {
