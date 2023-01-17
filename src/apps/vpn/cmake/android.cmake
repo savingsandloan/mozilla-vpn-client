@@ -40,6 +40,10 @@ target_sources(mozillavpn PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/tasks/purchase/taskpurchase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/linux/linuxpingsender.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/linux/linuxpingsender.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/android/androidupdater.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/android/androidupdater.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/android/androidversionapi.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/apps/vpn/platforms/android/androidversionapi.cpp
 )
 
 if(ADJUST_TOKEN)
