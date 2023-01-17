@@ -4,6 +4,10 @@
 
 #include "androidupdater.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QObject>
+
 #include "androidversionapi.h"
 #include "glean/generated/metrics.h"
 #include "gleandeprecated.h"
@@ -13,20 +17,17 @@
 #include "telemetry/gleansample.h"
 #include "urlopener.h"
 
-#include <QObject>
-#include <QJsonDocument>
-#include <QJsonObject>
-
 namespace {
 Logger logger("AndroidUpdater");
 
-constexpr auto SEVERE_UPDATE_LEVEL =5;
-}
+constexpr auto SEVERE_UPDATE_LEVEL = 5;
+}  // namespace
 
 AndroidUpdater::AndroidUpdater(QObject* parent) : Updater(parent) {
   MZ_COUNT_CTOR(AndroidUpdater);
-  logger.debug() << "AndroidUpdater created";   
-  connect(AndroidVersionAPI::Instance(),&AndroidVersionAPI::onUpdateResult,this,&AndroidUpdater::onUpdateData);
+  logger.debug() << "AndroidUpdater created";
+  connect(AndroidVersionAPI::Instance(), &AndroidVersionAPI::onUpdateResult,
+          this, &AndroidUpdater::onUpdateData);
 }
 
 AndroidUpdater::~AndroidUpdater() {
@@ -39,12 +40,12 @@ void AndroidUpdater::start(Task*) {
   AndroidVersionAPI::Instance()->requestUpdateInfo();
 }
 /**
- * @brief Consumes the  
- * 
+ * @brief Consumes the
+ *
  * @param data - JSON data of VPNUpdater.UpdateResult
  */
-void AndroidUpdater::onUpdateData(const QString& data){
-  if(data.isEmpty()){
+void AndroidUpdater::onUpdateData(const QString& data) {
+  if (data.isEmpty()) {
     logger.error() << "Failed to fetch android update data";
   }
   QJsonDocument json = QJsonDocument::fromJson(data.toLocal8Bit());
@@ -53,21 +54,21 @@ void AndroidUpdater::onUpdateData(const QString& data){
     return;
   }
   auto result = json.object();
-  if(!result.contains("isUpdateAvailable")){
+  if (!result.contains("isUpdateAvailable")) {
     logger.info() << "No update available.";
     return;
   }
 
   bool isUpdateAvailable = result["isUpdateAvailable"].toBool();
-  if(!isUpdateAvailable){
+  if (!isUpdateAvailable) {
     return;
   }
   int updateLevel = result["updateLevel"].toInt(0);
   int versionCode = result["versionCode"].toInt(0);
-  
+
   logger.info() << "Found Update to APK Version" << versionCode;
 
-  if(updateLevel >= SEVERE_UPDATE_LEVEL){
+  if (updateLevel >= SEVERE_UPDATE_LEVEL) {
     logger.info() << "Update is severe";
     emit updateRequired();
     return;

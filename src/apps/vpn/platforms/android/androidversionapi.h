@@ -9,14 +9,13 @@
 
 #include "jni.h"
 
-
 /**
- * @brief This is a Companion Class for VPNVersionAPI.kt 
- * 
- * It exposes a function to async query Google-Play to get new 
- * updates. 
+ * @brief This is a Companion Class for VPNVersionAPI.kt
+ *
+ * It exposes a function to async query Google-Play to get new
+ * updates.
  * On Completion it signals {onUpdateResult}
- * 
+ *
  */
 class AndroidVersionAPI final : public QObject {
   Q_DISABLE_COPY_MOVE(AndroidVersionAPI)
@@ -26,24 +25,24 @@ class AndroidVersionAPI final : public QObject {
 
   static AndroidVersionAPI* Instance();
   /**
-   * @brief Requests a new update info task 
+   * @brief Requests a new update info task
    * completion is signalled via the {onUpdateResult} signal.
    */
   void requestUpdateInfo();
 
- signals: 
-    /*
-     * @brief Signal Fired once a google play result is recieved
-     * 
-     * @param data - Depending on the outcome of the task: 
-     * OK -> A JSON String representing a VPNVersionAPI.UpdateResult
-     * Err -> An empty string  
-     */
-    void onUpdateResult(QString data);
+ signals:
+  /*
+   * @brief Signal Fired once a google play result is recieved
+   *
+   * @param data - Depending on the outcome of the task:
+   * OK -> A JSON String representing a VPNVersionAPI.UpdateResult
+   * Err -> An empty string
+   */
+  void onUpdateResult(QString data);
+
  private:
   AndroidVersionAPI();
   static void onJvmUpdateResult(JNIEnv* env, jobject thiz, jstring data);
-  
 };
 
 #endif  // AndroidVersionAPI_H
