@@ -103,6 +103,7 @@ void AuthenticationInApp::registerSession(AuthenticationInAppSession* session) {
     m_session = nullptr;
     setState(StateInitializing, session);
   });
+  connect(session, &AuthenticationInAppSession::completed, this, &AuthenticationInApp::completed);
 }
 
 void AuthenticationInApp::checkAccount(const QString& emailAddress) {

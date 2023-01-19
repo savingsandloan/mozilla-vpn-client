@@ -5,7 +5,7 @@
 # For CMake versions prior to 3.19, we may need to perform manual
 # finalization in order to pick up QML dependencies when built
 # statically.
-qt_add_executable(mozillavpn MANUAL_FINALIZATION)
+qt_add_executable(mozillavpn MANUAL_FINALIZATION apps/vpn/platforms/android/AndroidAutofill.cpp apps/vpn/platforms/android/AndroidAutofill.h)
 
 target_link_libraries(mozillavpn PRIVATE
     Qt6::Quick

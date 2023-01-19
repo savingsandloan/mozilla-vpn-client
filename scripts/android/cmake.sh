@@ -114,8 +114,8 @@ if ! [[ "$ADJUST_SDK_TOKEN" ]] && [[ "$MVPN_ANDROID_ADJUST_TOKEN" ]]; then
 fi
 
 
-printn Y "Cleaning the folder... "
-print G "done."
+#printn Y "Cleaning the folder... "
+#print G "done."
 
 rm -rf .tmp || die "Failed to remove the temporary directory"
 mkdir .tmp || die "Failed to create the temporary directory"

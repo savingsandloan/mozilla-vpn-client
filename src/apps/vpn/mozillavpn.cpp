@@ -55,6 +55,9 @@
 #  include "sentry/sentryadapter.h"
 #endif
 
+
+#include "platforms/android/AndroidAutofill.h"
+
 #ifdef MZ_IOS
 #  include "platforms/ios/iosutils.h"
 #endif
@@ -271,6 +274,8 @@ void MozillaVPN::initialize() {
   }
 
   AddonManager::instance();
+
+  AndroidAutofill::instance();
 
   RecentConnections::instance()->initialize();
 
