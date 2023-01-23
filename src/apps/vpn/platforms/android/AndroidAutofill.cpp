@@ -9,11 +9,15 @@
 
 #include "shared/constants.h"
 
+#include "inspector/inspectorutils.h"
+
 #include <QJniEnvironment>
 #include <QJniObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+#include <QQuickItem>
 
 
 namespace{
@@ -46,7 +50,7 @@ AndroidAutofill::AndroidAutofill() {
           this, [this](){
             auto state = AuthenticationInApp::instance()->state() ;
             if(state == AuthenticationInApp::StateStart ){
-              startAutoFillSession(Constants::fxaUrl());
+              startAutoFillSession(Constants::fxaUrl(),"authStart");
             }
           });
   connect(AuthenticationInApp::instance(), &AuthenticationInApp::completed, this,
@@ -77,9 +81,27 @@ void AndroidAutofill::commit(const QString username, const QString password) {
       );
 }
 
-void AndroidAutofill::startAutoFillSession(const QString fxa) {
+void AndroidAutofill::startAutoFillSession(const QString fxa, const QString Query) {
+/*
+  auto e = InspectorUtils::findObject(Query);
+  if(e == nullptr){
+    return;
+  }
+  QQuickItem* element = qobject_cast<QQuickItem*>(e);
+  if(element == nullptr){
+    return;
+  }
+
+
+  auto size = element->size();
+*/
   QJsonObject params;
   params["fxa_url"]=fxa;
+  params["width"]=100; //size.width();
+  params["height"]= 100;// size.height();
+  params["x"]= 100; // element->x();
+  params["y"]=100; // element->y();
+
   QJsonDocument doc(params);
   auto string = doc.toJson(QJsonDocument::Compact);
   auto jniString = QJniObject::fromString(string);

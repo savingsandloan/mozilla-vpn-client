@@ -2,6 +2,7 @@ package org.mozilla.firefox.vpn.qt
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.os.Build
 import android.util.Log
 import android.view.autofill.AutofillManager
@@ -40,11 +41,19 @@ object QtAutofillHelper {
         if(!manager.isAutofillSupported){
             return;
         }
-        val params = VPNAuthAutofillView.AutoFillParms(JSONObject(data).getString("fxa_url"));
+        val json = JSONObject(data);
+        val params = VPNAuthAutofillView.AutoFillParms(
+            json.getString("fxa_url"),
+            json.getInt("x"),
+            json.getInt("y"),
+            json.getInt("width"),
+            json.getInt("height"),
+        );
         mView = VPNAuthAutofillView(ctx,params,this)
         // TODO: we should prefer the call with the bounding box. 
-        // Todo: we should A: send the 
-        manager.notifyViewEntered(mView!!);
+        // Todo: we should A: send the
+        val box = Rect(params.x,params.y,params.x+params.width,params.y+params.height)
+        manager.notifyViewEntered(mView!!,1, box)
     }
 
     /**

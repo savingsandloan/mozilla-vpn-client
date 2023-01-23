@@ -21,7 +21,7 @@ class AndroidAutofill : public QObject {
      * credentials.
      * @param fxa - URL for FxA, should be the instance where the user want's to login c:
      */
-    void startAutoFillSession(const QString fxa);
+    void startAutoFillSession(const QString fxa, const QString QPath);
 
     /**
      * Should be called when authentification was successfull,
