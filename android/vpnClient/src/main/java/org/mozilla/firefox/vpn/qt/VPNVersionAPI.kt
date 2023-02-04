@@ -41,8 +41,7 @@ object VPNVersionAPI {
             update_info_task.addOnFailureListener {
                 onUpdateResult("")
             }
-        }
-
     }
+
     external fun onUpdateResult(updateInfo: String);
 }

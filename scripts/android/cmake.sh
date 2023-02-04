@@ -32,6 +32,8 @@ helpFunction() {
 print N "This script compiles MozillaVPN for Android"
 echo $QT_HOST_PATH
 
+export PATH=$PATH:$QT_HOST_PATH/bin
+
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -169,6 +171,7 @@ fi
 
 print Y "Compiling apk_install_target in .tmp/"
 # This compiles the client and generates a mozillavpn.so
+cmake --build .tmp -j$JOBS --target ndk_openssl_merged 
 cmake --build .tmp -j$JOBS
 
 # Generate a valid gradle project and pre-compile it.

@@ -8,14 +8,13 @@
 #include <QJsonObject>
 #include <QObject>
 
+
+#include "update/versionapi.h"
 #include "androidversionapi.h"
-#include "glean/generated/metrics.h"
-#include "gleandeprecated.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "task.h"
-#include "telemetry/gleansample.h"
-#include "urlopener.h"
+
 
 namespace {
 Logger logger("AndroidUpdater");
@@ -27,7 +26,7 @@ AndroidUpdater::AndroidUpdater(QObject* parent) : Updater(parent) {
   MZ_COUNT_CTOR(AndroidUpdater);
   logger.debug() << "AndroidUpdater created";
   connect(AndroidVersionAPI::Instance(), &AndroidVersionAPI::onUpdateResult,
-          this, &AndroidUpdater::onUpdateData);
+          this, &AndroidUpdater::onUpdateData);  
 }
 
 AndroidUpdater::~AndroidUpdater() {
@@ -37,6 +36,11 @@ AndroidUpdater::~AndroidUpdater() {
 
 void AndroidUpdater::start(Task*) {
   logger.info() << "Requested fresh update info";
+  // Create a "legacy" VersionAPI check
+  // we forward "updateRequired" so that we still can force 
+  // update old versions. 
+  auto fallBack = new VersionApi(this);
+  connect(fallBack, &VersionApi::updateRequired, this, &AndroidUpdater::updateRequired);
   AndroidVersionAPI::Instance()->requestUpdateInfo();
 }
 /**
