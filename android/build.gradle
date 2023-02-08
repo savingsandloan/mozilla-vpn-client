@@ -145,8 +145,8 @@ android {
         resConfig "en"
         minSdkVersion Config.minSdkVersion
         targetSdkVersion Config.targetSdkVersion
-        versionCode  System.getenv("VERSIONCODE")? System.getenv("VERSIONCODE")?.toInteger() : 99999
-        versionName  System.getenv("SHORTVERSION") ? System.getenv("SHORTVERSION"): ""
+        versionCode  2000
+        versionName  "2.1.0"
 
     }
     compileOptions {
