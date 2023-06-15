@@ -8,6 +8,8 @@
 #include "qmlengineholder.h"
 #include "logger.h"
 
+#include <mach/mach.h>
+
 
 #include "profiler.h"
 
@@ -32,9 +34,9 @@ void Profiler::start(int sampleRateInMS, QQmlEngine* target){
     connect(m_worker, &ProfilerWorker::done,this,&Profiler::onReport);
     connect(this, &Profiler::startWorker, m_worker, &ProfilerWorker::start);
     connect(this, &Profiler::stopWorker, m_worker, &ProfilerWorker::stop);
-    
+    thread_t core_thread = mach_thread_self();
     m_thread->start();
-    emit startWorker();
+    emit startWorker(core_thread);
 }
 
 void Profiler::initialize(){

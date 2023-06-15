@@ -10,6 +10,8 @@
 #include <QJSONObject>
 #include <QtQml/private/qqmlengine_p.h>
 
+#include <mach/mach.h>
+
 class ProfilerWorker final : public QObject {
   Q_OBJECT
   Q_DISABLE_COPY_MOVE(ProfilerWorker)
@@ -23,7 +25,7 @@ class ProfilerWorker final : public QObject {
     };
    
   public slots:
-    void start();
+    void start(thread_t parentThread);
     void stop();
 
   signals:
@@ -36,13 +38,21 @@ class ProfilerWorker final : public QObject {
     int m_sampleRateInMS = 1;
     QQmlEngine* m_target= nullptr;
     QV4::ExecutionEngine * m_js_engine = nullptr;
+    thread_t m_parentThread; 
     
 
     struct Measurement{
-      QVector<QV4::StackFrame> stackTrace;
+      QVector<QV4::CppStackFrame> stackTrace;
       qint64 timestamp;
     };
     QList<Measurement> m_samples;
+    
+    
+    /**
+     * Meta information associated for the entire profile.
+     * Returns JSON of : https://github.com/firefox-devtools/profiler/blob/main/src/types/profile.js#L750
+     */
+    QJsonObject getProfileMeta();
 
 };
 

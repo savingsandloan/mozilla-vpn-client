@@ -10,6 +10,8 @@
 #include <QThread>
 #include <QtQml/private/qqmlengine_p.h>
 
+#include <mach/mach.h>
+
 #include "profilerworker.h"
 
 class Profiler final : public QObject {
@@ -58,7 +60,7 @@ class Profiler final : public QObject {
   public slots: 
     void onReport(QJsonObject report);
   signals:
-    void startWorker();
+    void startWorker(thread_t parentThread);
     void stopWorker();
 
   private:
