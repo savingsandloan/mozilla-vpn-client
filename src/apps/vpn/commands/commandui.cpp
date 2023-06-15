@@ -44,6 +44,7 @@
 #include "notificationhandler.h"
 #include "productshandler.h"
 #include "profileflow.h"
+#include "profiler/profiler.h"
 #include "purchasehandler.h"
 #include "qmlengineholder.h"
 #include "releasemonitor.h"
@@ -236,6 +237,8 @@ int CommandUI::run(QStringList& tokens) {
     Glean::Initialize(engine);
     // Glean.rs
     MZGlean::initialize();
+
+    Profiler::initialize();
 
     Lottie::initialize(engine, QString(NetworkManager::userAgent()));
     Nebula::Initialize(engine);

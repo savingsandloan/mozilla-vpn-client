@@ -22,6 +22,7 @@
         <file>screens/getHelp/contactUs/ViewContactUsForm.qml</file>
         <file>screens/getHelp/contactUs/ViewContactUsThankYou.qml</file>
         <file>screens/getHelp/developerMenu/ViewAnimationsPlayground.qml</file>
+        <file>screens/getHelp/developerMenu/ViewProfiler.qml</file>
         <file>screens/getHelp/developerMenu/ViewDeveloperMenu.qml</file>
         <file>screens/getHelp/developerMenu/ViewFeatureList.qml</file>
         <file>screens/getHelp/developerMenu/ViewMessages.qml</file>
