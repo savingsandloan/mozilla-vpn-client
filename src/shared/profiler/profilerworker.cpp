@@ -4,6 +4,7 @@
 #include <QtQml/private/qqmlengine_p.h>
 #include <mach/mach.h>
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QObject>
 #include <QQmlEngine>
@@ -27,6 +28,7 @@ void ProfilerWorker::start(thread_t parentThread) {
   auto privateEngine = QQmlEnginePrivate::get(m_target);
   m_js_engine = privateEngine->v4engine();
   m_samples.clear();
+  m_start_timestamp = QDateTime::currentSecsSinceEpoch();
   m_timerID = startTimer(m_sampleRateInMS, Qt::PreciseTimer);
   logger.debug() << "ProfileWorker Started!";
 }
@@ -48,7 +50,7 @@ void ProfilerWorker::timerEvent(QTimerEvent* event) {
   // Not JS running, all good continue and exit.
   if (m_js_engine->currentStackFrame == nullptr) {
     if (thread_resume(m_parentThread) != KERN_SUCCESS) {
-        printf("OHNO WE BROKE THE WORLD");
+      printf("OHNO WE BROKE THE WORLD");
     }
     return;
   }
@@ -64,7 +66,7 @@ void ProfilerWorker::timerEvent(QTimerEvent* event) {
     current_frame = current_frame->parentFrame();
   }
   if (thread_resume(m_parentThread) != KERN_SUCCESS) {
-      printf("OHNO WE BROKE THE WORLD");
+    printf("OHNO WE BROKE THE WORLD");
   }
   if (count == 0) {
     // Nothing captured.
@@ -83,63 +85,114 @@ void ProfilerWorker::timerEvent(QTimerEvent* event) {
 }
 
 void ProfilerWorker::stop() {
-    killTimer(m_timerID);
-    m_timerID = 0;
-    logger.debug() << "Profiler Stopped!";
-    logger.debug() << "Captured Frames:" << m_samples.length();
-    
-    // Now Let's build a profile out of that info!
-    QJsonObject profile;
-    
-    
-    QJsonObject meta;
-    
+  killTimer(m_timerID);
+  m_end_timestamp = QDateTime::currentSecsSinceEpoch();
+  m_timerID = 0;
+  logger.debug() << "Profiler Stopped!";
+  logger.debug() << "Captured Frames:" << m_samples.length();
+
+  // Now Let's build a profile out of that info!
+  QJsonObject profile;
+  profile.insert("meta", getProfileMeta());
+
+  // Shared Libs Loaded
+  profile.insert("libs", QJsonArray())
+  profile.insert("threads", getTreadReport());
+}
+QJsonArray ProfilerWorker::getTreadReport() {
+  QJsonArray threads;
+  QJsonObject qmlThread;
+
+  qmlThread.insert("processType", "default");
+  qmlThread.insert("processStartupTime", m_start_timestamp);
+  qmlThread.insert("processShutdownTime", m_end_timestamp);
+  qmlThread.insert("registerTime", m_start_timestamp);
+  qmlThread.insert("unregisterTime", m_end_timestamp);
+  qmlThread.insert("pausedRanges", QJsonArray());
+
+  qmlThread.insert("name", "Mozilla VPN Qml");
+  qmlThread.insert("isMainThread", true);
+  qmlThread.insert("pid", "0");  // TODO: Fill
+  qmlThread.insert("tid", "1");  // TODO: Fill
+  qmlThread.insert("samples", getSamples());
+  qmlThread.insert("markers", getMarkerTable());
+
+  threads.append(qmlThread);
+  return threads;
 }
 
-QJsonObject ProfilerWorker::getProfileMeta(){
-    QJsonObject meta;
+QJsonObject ProfilerWorker::getProfileMeta() {
+  QJsonObject meta;
 
-    meta.insert("interval", "Milliseconds");
-    meta.insert("startTime", "Milliseconds");
-    meta.insert("endTime", QJsonValue::Undefined);
-    meta.insert("profilingStartTime", QJsonValue::Undefined);
-    meta.insert("profilingEndTime", QJsonValue::Undefined);
-    meta.insert("processType", 0);
-    meta.insert("extensions", QJsonObject());
-    meta.insert("categories", QJsonObject());
-    meta.insert("product", "Firefox");
-    meta.insert("stackwalk", 0);
-    meta.insert("debug", QJsonValue::Undefined);
-    meta.insert("version", 0);
-    meta.insert("preprocessedProfileVersion", 0);
-    meta.insert("abi", QJsonValue::Undefined);
-    meta.insert("misc", QJsonValue::Undefined);
-    meta.insert("oscpu", QJsonValue::Undefined);
-    meta.insert("mainMemory", "Bytes");
-    meta.insert("platform", "string");
-    meta.insert("toolkit", "string");
-    meta.insert("appBuildID", QJsonValue::Undefined);
-    meta.insert("arguments", QJsonValue::Undefined);
-    meta.insert("sourceURL", QJsonValue::Undefined);
-    meta.insert("physicalCPUs", QJsonValue::Undefined);
-    meta.insert("logicalCPUs", QJsonValue::Undefined);
-    meta.insert("CPUName", QJsonValue::Undefined);
-    meta.insert("symbolicated", QJsonValue::Undefined);
-    meta.insert("symbolicationNotSupported", QJsonValue::Undefined);
-    meta.insert("updateChannel", "string");
-    meta.insert("visualMetrics", QJsonObject());
-    meta.insert("configuration", QJsonObject());
-    meta.insert("markerSchema", QJsonArray());
-    meta.insert("sampleUnits", QJsonValue::Undefined);
-    meta.insert("device", QJsonValue::Undefined);
-    meta.insert("importedFrom", QJsonValue::Undefined);
-    meta.insert("usesOnlyOneStackType", QJsonValue::Undefined);
-    meta.insert("doesNotUseFrameImplementation", QJsonValue::Undefined);
-    meta.insert("sourceCodeIsNotOnSearchfox", QJsonValue::Undefined);
-    meta.insert("extra", QJsonArray());
-    meta.insert("initialVisibleThreads", QJsonArray());
-    meta.insert("initialSelectedThreads", QJsonArray());
-    meta.insert("keepProfileThreadOrder", QJsonValue::Undefined);
+  meta.insert("interval", m_sampleRateInMS);
+  // TODO: When did the process start? - Lets keep profiling times for now
+  meta.insert("startTime", m_start_timestamp);
+  meta.insert("endTime", m_end_timestamp);
+  meta.insert("profilingStartTime", m_start_timestamp);
+  meta.insert("profilingEndTime", m_end_timestamp);
+  meta.insert("processType", 0);  // GeckoProcessType_Default = 0
 
-    return meta;
+  meta.insert("product", "Mozilla VPN - QML");
+  meta.insert("stackwalk", 1);
+#ifdef MZ_DEBUG
+  meta.insert("debug", true);
+#else
+  meta.insert("debug", false);
+#endif
+  meta.insert("markerSchema", QJsonArray());
+  meta.insert("version", 24);                     // File Version
+  meta.insert("preprocessedProfileVersion", 47);  // Not sure?!
+
+  // -- ANTHING BELOW HERE IS OPTIONAL --
+
+  // meta.insert("abi", QJsonValue::Undefined);
+  // The "misc" value of the browser's user agent, typically the revision of the
+  // browser.
+  // meta.insert("misc", QJsonValue::Undefined);
+  // The OS and CPU. e.g. "Intel Mac OS X"
+  // meta.insert("oscpu", QJsonValue::Undefined);
+  // meta.insert("mainMemory", "Bytes");
+  // meta.insert("platform", "Macintosh");
+  // meta.insert("toolkit", "Qt");
+  // meta.insert("appBuildID", QJsonValue::Undefined);
+  // meta.insert("arguments", QJsonValue::Undefined);
+  // meta.insert("sourceURL", QJsonValue::Undefined);
+  // meta.insert("physicalCPUs", QJsonValue::Undefined);
+  // meta.insert("logicalCPUs", QJsonValue::Undefined);
+  // meta.insert("CPUName", QJsonValue::Undefined);
+  // meta.insert("symbolicated", QJsonValue::Undefined);
+  // meta.insert("symbolicationNotSupported", QJsonValue::Undefined);
+  // meta.insert("updateChannel", "string");
+  // meta.insert("visualMetrics", QJsonObject());
+  // meta.insert("configuration", QJsonObject());
+  // meta.insert("sampleUnits", QJsonValue::Undefined);
+  // meta.insert("device", QJsonValue::Undefined);
+  // meta.insert("importedFrom", QJsonValue::Undefined);
+  // meta.insert("usesOnlyOneStackType", QJsonValue::Undefined);
+  // meta.insert("doesNotUseFrameImplementation", QJsonValue::Undefined);
+  // meta.insert("sourceCodeIsNotOnSearchfox", QJsonValue::Undefined);
+  // meta.insert("extra", QJsonArray());
+  // meta.insert("initialVisibleThreads", QJsonArray());
+  // meta.insert("initialSelectedThreads", QJsonArray());
+  // meta.insert("keepProfileThreadOrder", QJsonValue::Undefined);
+
+  return meta;
+}
+
+
+QJsonObject ProfilerWorker::getMarkerTable() {
+  QJsonObject table;
+  table.insert("data", QJsonValue::Null);
+  table.insert("name", QJsonArray());
+  table.insert("startTime", QJsonValue::Null);
+  table.insert("endTime", QJsonValue::Null);
+  table.insert("phase", QJsonArray());
+  table.insert("category", QJsonArray());
+  table.insert("threadId", QJsonArray());
+  table.insert("length", 0);
+}
+
+QJsonObject ProfilerWorker::getSamples(){
+    QJsonObject table;
+    return table;
 }

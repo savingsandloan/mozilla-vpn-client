@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QJSEngine>
 #include <QJSONObject>
+#include <QJSONArray>
 #include <QtQml/private/qqmlengine_p.h>
 
 #include <mach/mach.h>
@@ -34,6 +35,9 @@ class ProfilerWorker final : public QObject {
   protected:
     void timerEvent(QTimerEvent *event) override;
   private:
+    qint64 m_start_timestamp =0;
+    qint64 m_end_timestamp =0;
+    
     int m_timerID = 0; // 0 == No timer
     int m_sampleRateInMS = 1;
     QQmlEngine* m_target= nullptr;
@@ -53,6 +57,23 @@ class ProfilerWorker final : public QObject {
      * Returns JSON of : https://github.com/firefox-devtools/profiler/blob/main/src/types/profile.js#L750
      */
     QJsonObject getProfileMeta();
+    QJsonObject getSamples();
+
+    /**
+     * Markers represent arbitrary events that happen within the browser. They have a
+     * name, time, and potentially a JSON data payload. These can come from all over the
+     * system. For instance Paint markers instrument the rendering and layout process.
+     * Engineers can easily add arbitrary markers to their code without coordinating with
+     * profiler.firefox.com to instrument their code.
+     *
+     * In the profile, these markers are raw and unprocessed. In the marker selectors, we
+     * can run them through a processing pipeline to match up start and end markers to
+     * create markers with durations, or even take a string-only marker and parse
+     * it into a structured marker.
+     */
+    QJsonObject getMarkerTable();
+
+    QJsonArray getTreadReport();
 
 };
 
