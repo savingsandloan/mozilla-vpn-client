@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_library(shared-sources INTERFACE)
+add_library(shared-sources)
 
 if(NOT MSVC AND NOT IOS)
   target_compile_options(shared-sources INTERFACE -Wall -Werror -Wno-conversion)
@@ -140,6 +140,10 @@ target_sources(shared-sources INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectoritempicker.h
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorutils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebchannel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebchannel.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebchanneltransport.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared//inspector/inspectorwebchanneltransport.h
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebsocketconnection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebsocketconnection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/shared/inspector/inspectorwebsocketserver.cpp
