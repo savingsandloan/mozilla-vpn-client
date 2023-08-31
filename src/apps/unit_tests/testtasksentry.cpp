@@ -7,7 +7,7 @@
 #include <QTextStream>
 
 #include "helper.h"
-#include "tasks/sentry/tasksentry.h"
+#include "sentry/tasks/tasksentry.h"
 
 void TestTaskSentry::testParse_data() {
   QTest::addColumn<QByteArray>("input");

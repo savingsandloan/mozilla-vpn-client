@@ -35,7 +35,8 @@ if( ${_SUPPORTED} GREATER -1 )
         tasks/tasksentry.h
         tasks/tasksentryconfig.cpp
         tasks/tasksentryconfig.h
-        sentryplatformdelegate.h
+        sentrywatchdog.h
+        sentrywatchdog.cpp
     )
 
     # Configure Linking and Compile
@@ -83,6 +84,9 @@ if( ${_SUPPORTED} GREATER -1 )
                         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake
                         -DSENTRY_BACKEND=inproc
             )
+        target_sources(shared-sources INTERFACE
+            platforms/android/androidwatchdog.h
+        )
     
     endif()
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

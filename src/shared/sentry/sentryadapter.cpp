@@ -21,8 +21,8 @@
 #include "loghandler.h"
 #include "qmlengineholder.h"
 #include "settingsholder.h"
-#include "tasks/sentry/tasksentry.h"
-#include "tasks/sentryconfig/tasksentryconfig.h"
+#include "tasks/tasksentry.h"
+#include "tasks/tasksentryconfig.h"
 #include "taskscheduler.h"
 
 namespace {
