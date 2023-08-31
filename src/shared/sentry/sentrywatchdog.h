@@ -2,15 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef SENTRYADAPTER_H
-#define SENTRYADAPTER_H
+#ifndef SentryWatchdog_H
+#define SentryWatchdog_H
 
 #include <QObject>
+#include <QPointer>
 #include <QTimer>
-
-#ifdef MZ_ANDROID
-#  include "platforms/android/androidwatchdog.h"
-#endif
 
 /**
  * @brief Watchdog for the UI thread
@@ -18,7 +15,8 @@
  *
  *
  */
-class SentryWatchdog final : public QObject {
+class SentryWatchdog : public QObject {
+  Q_OBJECT
  public:
   explicit SentryWatchdog(QObject* parent);
   ~SentryWatchdog();
@@ -31,32 +29,24 @@ class SentryWatchdog final : public QObject {
    * @param parent - QObject-Parent
    * @return nullptr|SentryWatchdog*
    */
-  static SentryWatchdog* create(QObject* parent) {
-#ifdef MZ_ANDROID
-    return new Sentry::AndroidWatchDog(parent);
-#endif
-    return nullptr;
-  }
-
+  static SentryWatchdog* create(QObject* parent);
   void start(int anr_timeout_in_ms = 4000);
   void stop();
 
-  slots:
-  void kick();
-
- signals:
-  void timeout();
+  Q_SLOT void kick();
+  Q_SIGNAL void timeout(qint64 last_seen_timestamp);
 
  private:
   /**
-   * @brief This function should dispatch the runnable to the UI Thread.
-   * It's not important if that runnable is sync or async executed.
+   * @brief This function should dispatch a runnable to the UI Thread.
+   * It must call kick() every {kick_timeout}ms.
    *
-   * @param runnable
+   * @param kick_timeout_in_ms
    */
-  virtual void runOnUIThread(std::function<void()> runnable);
+  virtual void startWorker(int kick_timeout_in_ms) = 0;
+  // Should stop the worker
+  virtual void stopWorker() = 0;
 
   QTimer m_watchdogTimer;
-  QPointer<QTimer> m_uiThreadTimer;
 };
-#endif  // SENTRYADAPTER_H
+#endif  // SentryWatchdog_H

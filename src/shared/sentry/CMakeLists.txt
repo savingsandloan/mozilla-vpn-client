@@ -86,6 +86,7 @@ if( ${_SUPPORTED} GREATER -1 )
             )
         target_sources(shared-sources INTERFACE
             platforms/android/androidwatchdog.h
+            platforms/android/androidwatchdog.cpp
         )
     
     endif()

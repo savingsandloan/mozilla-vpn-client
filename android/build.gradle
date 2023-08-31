@@ -135,7 +135,7 @@ android {
             versionNameSuffix "-debug"
             packagingOptions {
                 // specify the path to your object binaries, or generally:
-                doNotStrip '**.so'
+                doNotStrip 'libs/*/*.so'
             }
         }
     }

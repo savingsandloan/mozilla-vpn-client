@@ -4,51 +4,55 @@
 
 #include "sentrywatchdog.h"
 
+#include <QDateTime>
+
+#ifdef MZ_ANDROID
+#  include "platforms/android/androidwatchdog.h"
+#endif
+
+namespace {
+qint64 watchdog_kick = 6;
+
+}  // namespace
+
 SentryWatchdog::SentryWatchdog(QObject* parent) : QObject(parent) {
-  connect(m_watchDogTimer, &QTimer::timeout, this, [&]() {
-    stop();
-    emit timeout();
-  });
-  m_watchDogTimer.setSingleShot(true);
+  m_watchdogTimer.setSingleShot(true);
 }
 
 SentryWatchdog::~SentryWatchdog() { stop(); }
 
-SentryWatchdog::start(int anr_timeout_in_ms) {
+void SentryWatchdog::start(int anr_timeout_in_ms) {
   int kick_timeout = anr_timeout_in_ms / 4;
 
-  if (!m_uiThreadTimer.isNull()) {
-    m_uiThreadTimer->deleteLater();
-  }
-
-  runOnUIThread([&]() {
-    auto uiThreadTimer = new QTimer();
-    connect(uiThreadTimer, &QTimer::timeout, this, &SentryWatchdog::kick,
-            Qt::QueuedConnection);
-    m_uiThreadTimer = uiThreadTimer;
-    uiThreadTimer.start(kick_timeout);
-  });
+  startWorker(kick_timeout);
+  m_watchdogTimer.start(anr_timeout_in_ms);
 }
 
-SentryWatchdog::stop() {
-  m_watchDogTimer.stop();
-  if (!m_uiThreadTimer.isNull()) {
-    m_uiThreadTimer->deleteLater();
-  }
+void SentryWatchdog::stop() {
+  m_watchdogTimer.stop();
+  stopWorker();
 }
 
-SentryWatchdog::kick() {
-  auto interval = m_watchDogTimer.interval();
-  if (!m_watchDogTimer.isActive()) {
+void SentryWatchdog::kick() {
+  if (!m_watchdogTimer.isActive()) {
     // In case we have already fired timeout, due to
     // late response, ignore the kick.
     return;
   }
+  auto interval = m_watchdogTimer.interval();
   if (interval == 0) {
     // We should not have kick
     Q_ASSERT(false);
     return;
   }
+  watchdog_kick = QDateTime::currentMSecsSinceEpoch();
   // start(), will reset the timer
-  m_watchDogTimer.start(interval);
+  m_watchdogTimer.start(interval);
+}
+
+SentryWatchdog* SentryWatchdog::create(QObject* parent) {
+#ifdef MZ_ANDROID
+  return new AndroidWatchDog(parent);
+#endif
+  return nullptr;
 }

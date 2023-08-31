@@ -12,6 +12,7 @@
 
 #include <QDir>
 #include <QQuickItem>
+#include <QScopeGuard>
 #include <QStandardPaths>
 
 #include "constants.h"
@@ -20,6 +21,7 @@
 #include "logger.h"
 #include "loghandler.h"
 #include "qmlengineholder.h"
+#include "sentrywatchdog.h"
 #include "settingsholder.h"
 #include "tasks/tasksentry.h"
 #include "tasks/tasksentryconfig.h"
@@ -78,6 +80,13 @@ void SentryAdapter::init() {
                                    sentryFolder.toLocal8Bit().constData());
   sentry_options_set_on_crash(options, &SentryAdapter::onCrash, NULL);
 
+#ifdef MZ_DEBUG
+  // If this a debug build, changes are high sentry has no symbols for the stack
+  // trace, but also changes are high they are in the current binary aswell. So
+  // let's symbolize locally before sending to sentry.
+  sentry_options_set_symbolize_stacktraces(options, 1);
+#endif
+
 #ifdef SENTRY_NONE_TRANSPORT
   sentry_transport_t* transport =
       sentry_transport_new(&SentryAdapter::transportEnvelope);
@@ -93,15 +102,28 @@ void SentryAdapter::init() {
     logger.error() << "Sentry failed to init!";
     return;
   };
+  // Sentry is ready now.
+  initWatchdog();
+
   m_initialized = true;
   setPlatformTag();
   logger.info() << "Sentry initialized";
 }
 
 void SentryAdapter::report(const QString& errorType, const QString& message,
-                           bool attachStackTrace) {
+                           bool attachStackTrace, bool attachContext) {
   if (!m_initialized) {
     return;
+  }
+  auto context_guard = qScopeGuard([&] { removeContext("global"); });
+  if (attachContext) {
+    auto context = globalEventContext.value();
+    if (!context.isEmpty()) {
+      setContext("global", context);
+    } else {
+      logger.error()
+          << "Sentry was tasked to attach Context, but none was given";
+    }
   }
   sentry_value_t event = sentry_value_new_event();
   sentry_value_t exc = sentry_value_new_exception(errorType.toLocal8Bit(),
@@ -110,6 +132,7 @@ void SentryAdapter::report(const QString& errorType, const QString& message,
   if (attachStackTrace) {
     sentry_value_set_stacktrace(exc, NULL, 0);
   }
+
   sentry_event_add_exception(event, exc);
   sentry_capture_event(event);
 }
@@ -221,4 +244,70 @@ void SentryAdapter::setPlatformTag() const {
 #else
   sentry_set_tag("platform", "Dummy");
 #endif
+}
+
+void SentryAdapter::initWatchdog() {
+  QPointer<SentryWatchdog> watchdog = SentryWatchdog::create(this);
+  if (watchdog.isNull()) {
+    logger.error() << "Nooo watchdooog";
+    return;
+  }
+  connect(watchdog, &SentryWatchdog::timeout, this,
+          [&, watchdog](qint64 timestamp) {
+            logger.error() << "ANR ANR ANR";
+            logger.error() << "Last Seen" << timestamp;
+            report("ANR", "Timeout", false, true);
+            // watchdog->start();
+          });
+  watchdog->start();
+}
+
+void SentryAdapter::setContext(QString name, QVariantMap values) {
+  QMapIterator<QString, QVariant> iterator(values);
+  sentry_value_t sentry_values = sentry_value_new_object();
+  while (iterator.hasNext()) {
+    iterator.next();
+    QString key = iterator.key();
+    QVariant value = iterator.value();
+    QMetaType value_type = value.metaType();
+    sentry_value_t sentry_value;
+    switch (value_type.id()) {
+      case QMetaType::Void:
+        [[fallthrough]];
+      case QMetaType::Nullptr:
+        [[fallthrough]];
+      case QMetaType::VoidStar:
+        [[fallthrough]];
+      case QMetaType::UnknownType:
+        sentry_value = sentry_value_new_null();
+        break;
+      case QMetaType::Int:
+        [[fallthrough]];
+      case QMetaType::UInt:
+        sentry_value = sentry_value_new_int32(value.toInt());
+        break;
+      case QMetaType::Double:
+        sentry_value = sentry_value_new_double(value.toDouble());
+        break;
+      case QMetaType::Bool:
+        sentry_value = sentry_value_new_bool(value.toBool());
+        break;
+      case QMetaType::QString:
+        sentry_value =
+            sentry_value_new_string(value.toString().toLocal8Bit().constData());
+        break;
+      default:
+        sentry_value = sentry_value_new_null();
+        logger.error() << "Sentry Context contains unknown type: "
+                       << value_type.name();
+        break;
+    }
+    sentry_value_set_by_key(sentry_values, key.toLocal8Bit().constData(),
+                            sentry_value);
+  }
+  sentry_set_context(name.toLocal8Bit().constData(), sentry_values);
+}
+
+void SentryAdapter::removeContext(QString name) {
+  sentry_remove_context(name.toLocal8Bit().constData());
 }

@@ -16,6 +16,7 @@ typedef void* sentry_envelope_t;
 
 #include <QApplication>
 #include <QObject>
+#include <QProperty>
 
 class SentryAdapter final : public QObject {
   Q_OBJECT
@@ -34,14 +35,19 @@ class SentryAdapter final : public QObject {
 
   /**
    * @brief Sends an "Issue" report to Sentry
+   * IMPORTANT: Adding a stacktrace will prompt for user permission to send the
+   * event. If no stacktrace is added, the users Telemetry Setting will be used
+   * to determine if the event should be reported.
    *
    * @param category - "Category" of the error, any String is valid.
    * @param message - Additional message content.
    * @param attachStackTrace - If true a stacktrace for later debugging will be
    * attached.
+   * @param attachContext - If true the {globalEventContext} will be added to
+   * the Error Reports. attached.
    */
   void report(const QString& category, const QString& message,
-              bool attachStackTrace = false);
+              bool attachStackTrace = false, bool attachContext = false);
 
   /**
    * @brief Event Slot for when a log-line is added.
@@ -130,6 +136,14 @@ class SentryAdapter final : public QObject {
    */
   Q_INVOKABLE static void captureQMLStacktrace(const char* description);
 
+  /**
+   * @brief Extra Data that can be added to error reports.
+   *
+   * IMPORTANT: Only use for Category 1 “Technical data”
+   * See: https://wiki.mozilla.org/Data_Collection
+   */
+  QProperty<QVariantMap> globalEventContext;
+
  signals:
   /**
    * @brief Signal that is fired whenever the consent changed, note: can sill be
@@ -149,6 +163,11 @@ class SentryAdapter final : public QObject {
    * @brief Sets Tags related to the Platform
    */
   void setPlatformTag() const;
+
+  void initWatchdog();
+
+  void setContext(QString name, QVariantMap values);
+  void removeContext(QString name);
 
   bool m_initialized = false;
   UserConsentResult m_userConsent = UserConsentResult::Pending;

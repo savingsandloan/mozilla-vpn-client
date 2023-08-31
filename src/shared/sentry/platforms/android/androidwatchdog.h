@@ -10,17 +10,16 @@
 #include "../../../platforms/android/androidcommons.h"
 #include "../../sentrywatchdog.h"
 
-namespace Sentry {
 class AndroidWatchDog final : public SentryWatchdog {
   Q_OBJECT
   Q_DISABLE_COPY_MOVE(AndroidWatchDog)
-
+ public:
   AndroidWatchDog(QObject* parent) : SentryWatchdog(parent) {}
-  AndroidWatchDog::~AndroidWatchDog(){};
+  ~AndroidWatchDog(){};
 
-  override void runOnUIThread(std::function<void()> runnable) {
-    AndroidCommons::runOnAndroidThreadSync(runnable);
-  }
+  void startWorker(int kick_timeout) override;
+
+  void stopWorker() override{};
 };
-}  // namespace Sentry
+
 #endif  // ANDROID_WATCHDOG_H
