@@ -130,8 +130,8 @@ target_sources(app_unit_tests PRIVATE
     websocket/testwebsockethandler.cpp
     websocket/testwebsockethandler.h
     ${MZ_SOURCE_DIR}/shared/sentry/sentryadapter.h
-    ${MZ_SOURCE_DIR}/shared/tasks/sentry/tasksentry.cpp
-    ${MZ_SOURCE_DIR}/shared/tasks/sentry/tasksentry.h
+    ${MZ_SOURCE_DIR}/shared/sentry/tasks/tasksentry.cpp
+    ${MZ_SOURCE_DIR}/shared/sentry/tasks/tasksentry.h
 )
 
 if(NOT BUILD_ADJUST_SDK_TOKEN)

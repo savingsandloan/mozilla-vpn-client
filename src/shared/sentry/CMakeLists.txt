@@ -29,12 +29,13 @@ if( ${_SUPPORTED} GREATER -1 )
 
     # Sentry support is given
     target_sources(shared-sources INTERFACE
-        shared/sentry/sentryadapter.cpp
-        shared/sentry/sentryadapter.h
-        shared/tasks/sentry/tasksentry.cpp
-        shared/tasks/sentry/tasksentry.h
-        shared/tasks/sentryconfig/tasksentryconfig.cpp
-        shared/tasks/sentryconfig/tasksentryconfig.h
+        sentryadapter.cpp
+        sentryadapter.h
+        tasks/tasksentry.cpp
+        tasks/tasksentry.h
+        tasks/tasksentryconfig.cpp
+        tasks/tasksentryconfig.h
+        sentryplatformdelegate.h
     )
 
     # Configure Linking and Compile
