@@ -72,8 +72,9 @@ QString WindowsAppListProvider::getAppName(const QString& appId) {
 
 bool WindowsAppListProvider::isValidAppId(const QString& appId) {
   const QFileInfo info(appId);
-  return info.exists() && info.isExecutable() &&
-         WindowsAppImageProvider::hasImage(appId);
+  return info.exists() && info.isExecutable();
+  // TODO: Is this a good rule?
+  // && WindowsAppImageProvider::hasImage(appId);
 }
 /**
  * @brief Reads all .lnk's in a Dir, filters them and Puts them into a QMap
