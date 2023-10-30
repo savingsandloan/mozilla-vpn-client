@@ -2,23 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "serverhandler.h"
+#include "extensionhandler.h"
 
 #include <QHostAddress>
 #include <QTcpSocket>
 
 #include "leakdetector.h"
 #include "logger.h"
-#include "serverconnection.h"
+#include "extensionconnection.h"
 
 namespace {
-Logger logger("ServerHandler");
+Logger logger("ExtensionHandler");
 }
 
 constexpr int SERVER_PORT = 8754;
 
-ServerHandler::ServerHandler() {
-  MZ_COUNT_CTOR(ServerHandler);
+ExtensionHandler::ExtensionHandler() {
+  MZ_COUNT_CTOR(ExtensionHandler);
 
   logger.debug() << "Creating the server";
 
@@ -27,16 +27,16 @@ ServerHandler::ServerHandler() {
     return;
   }
 
-  connect(this, &ServerHandler::newConnection, this,
-          &ServerHandler::newConnectionReceived);
+  connect(this, &ExtensionHandler::newConnection, this,
+          &ExtensionHandler::newConnectionReceived);
 }
 
-ServerHandler::~ServerHandler() { MZ_COUNT_DTOR(ServerHandler); }
+ExtensionHandler::~ExtensionHandler() { MZ_COUNT_DTOR(ExtensionHandler); }
 
-void ServerHandler::newConnectionReceived() {
+void ExtensionHandler::newConnectionReceived() {
   QTcpSocket* child = nextPendingConnection();
   Q_ASSERT(child);
 
-  ServerConnection* connection = new ServerConnection(this, child);
+  ExtensionConnection* connection = new ExtensionConnection(this, child);
   connect(child, &QTcpSocket::disconnected, connection, &QObject::deleteLater);
 }

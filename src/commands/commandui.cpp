@@ -92,7 +92,7 @@
 #endif
 
 #ifdef MVPN_WEBEXTENSION
-#  include "server/serverhandler.h"
+#  include "extension/extensionhandler.h"
 #endif
 
 #include <QApplication>
@@ -444,9 +444,9 @@ int CommandUI::run(QStringList& tokens) {
 #endif
 
 #ifdef MVPN_WEBEXTENSION
-    ServerHandler serverHandler;
+    ExtensionHandler extensionHandler;
     QObject::connect(vpn.connectionManager(), &ConnectionManager::readyToQuit,
-                     &serverHandler, &ServerHandler::close);
+                     &extensionHandler, &ExtensionHandler::close);
 #endif
 
     KeyRegenerator keyRegenerator;

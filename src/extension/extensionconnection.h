@@ -2,21 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef SERVERCONNECTION_H
-#define SERVERCONNECTION_H
+#ifndef ExtensionConnection_H
+#define ExtensionConnection_H
 
 #include <QByteArray>
 #include <QObject>
 
 class QTcpSocket;
 
-class ServerConnection final : public QObject {
+class ExtensionConnection final : public QObject {
   Q_OBJECT
-  Q_DISABLE_COPY_MOVE(ServerConnection)
+  Q_DISABLE_COPY_MOVE(ExtensionConnection)
 
  public:
-  ServerConnection(QObject* parent, QTcpSocket* connection);
-  ~ServerConnection();
+  ExtensionConnection(QObject* parent, QTcpSocket* connection);
+  ~ExtensionConnection();
 
  private:
   void readData();
@@ -44,4 +44,4 @@ class ServerConnection final : public QObject {
   uint32_t m_messageLength = 0;
 };
 
-#endif  // SERVERCONNECTION_H
+#endif  // ExtensionConnection_H
