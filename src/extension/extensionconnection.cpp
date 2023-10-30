@@ -21,6 +21,8 @@
 #include "models/serverdata.h"
 #include "mozillavpn.h"
 #include "settingsholder.h"
+#include "tasks/controlleraction/taskcontrolleraction.h"
+#include "taskscheduler.h"
 
 constexpr uint32_t MAX_MSG_SIZE = 1024 * 1024;
 
@@ -132,7 +134,12 @@ QJsonObject serializeStatus() {
 static QList<RequestType> s_types{
     RequestType{"activate",
                 [](const QJsonObject&) {
-                  MozillaVPN::instance()->activate();
+                  auto t = new TaskControllerAction(
+                      TaskControllerAction::eActivateExtensionOnly,
+                      ConnectionManager::eServerCoolDownNotNeeded);
+                  TaskScheduler::scheduleTask(t);
+                  QJsonObject obj;
+                  obj["ok"] = true;
                   return QJsonObject();
                 }},
 

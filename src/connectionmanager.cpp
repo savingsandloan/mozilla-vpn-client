@@ -292,10 +292,12 @@ void ConnectionManager::handshakeTimeout() {
     logger.info() << "Connection Attempt: Using Port 53 Option this time.";
     // On the first retry, opportunisticly try again using the port 53
     // option enabled, if that feature is disabled.
-    activateInternal(ForceDNSPort, RandomizeServerSelection);
+    activateInternal(ForceDNSPort, RandomizeServerSelection,
+                     m_protectWholeDevice);
     return;
   } else if (m_connectionRetry < CONNECTION_MAX_RETRY) {
-    activateInternal(DoNotForceDNSPort, RandomizeServerSelection);
+    activateInternal(DoNotForceDNSPort, RandomizeServerSelection,
+                     m_protectWholeDevice);
     return;
   }
 
@@ -351,7 +353,8 @@ void ConnectionManager::logout() {
 }
 
 void ConnectionManager::activateInternal(
-    DNSPortPolicy dnsPort, ServerSelectionPolicy serverSelectionPolicy) {
+    DNSPortPolicy dnsPort, ServerSelectionPolicy serverSelectionPolicy,
+    bool protectWholeDevice) {
   logger.debug() << "Activation internal";
   Q_ASSERT(m_impl);
 
@@ -500,10 +503,22 @@ void ConnectionManager::clearConnectedTime() {
 }
 
 QList<IPAddress> ConnectionManager::getAllowedIPAddressRanges(
-    const Server& exitServer) {
+    const Server& exitServer, bool protectWholeDevice) {
   logger.debug() << "Computing the allowed IP addresses";
 
   QList<IPAddress> list;
+
+  if (!protectWholeDevice) {
+    // Ensure that the Mullvad proxy services are always allowed.
+    list.append(IPAddress(QHostAddress(MULLVAD_PROXY_RANGE),
+                          MULLVAD_PROXY_RANGE_LENGTH));
+    // Allow access to the internal gateway addresses.
+    logger.debug() << "Allow the IPv4 gateway:" << exitServer.ipv4Gateway();
+    list.append(IPAddress(QHostAddress(exitServer.ipv4Gateway()), 32));
+    logger.debug() << "Allow the IPv6 gateway:" << exitServer.ipv6Gateway();
+    list.append(IPAddress(QHostAddress(exitServer.ipv6Gateway()), 128));
+    return list;
+  }
 
 #ifdef MZ_IOS
   // Note: On iOS, we use the `excludeLocalNetworks` flag to ensure
@@ -910,7 +925,8 @@ QString ConnectionManager::currentServerString() const {
 // for now they will reside here
 
 bool ConnectionManager::activate(const ServerData& serverData,
-                                 ServerSelectionPolicy serverSelectionPolicy) {
+                                 ServerSelectionPolicy serverSelectionPolicy,
+                                 bool protectWholeDevice) {
   logger.debug() << "Activation" << m_state;
   if (m_state != ConnectionManager::StateOff &&
       m_state != ConnectionManager::StateSwitching &&
@@ -918,7 +934,7 @@ bool ConnectionManager::activate(const ServerData& serverData,
     logger.debug() << "Already connected";
     return false;
   }
-
+  m_protectWholeDevice = protectWholeDevice;
   m_serverData = serverData;
 
 #ifdef MZ_DUMMY
@@ -947,8 +963,8 @@ bool ConnectionManager::activate(const ServerData& serverData,
     request->get(Constants::apiUrl(Constants::Account));
 
     connect(request, &NetworkRequest::requestFailed, this,
-            [this, serverSelectionPolicy](QNetworkReply::NetworkError error,
-                                          const QByteArray&) {
+            [this, serverSelectionPolicy, protectWholeDevice](
+                QNetworkReply::NetworkError error, const QByteArray&) {
               logger.error() << "Account request failed" << error;
               REPORTNETWORKERROR(error, ErrorHandler::DoNotPropagateError,
                                  "PreActivationSubscriptionCheck");
@@ -966,16 +982,19 @@ bool ConnectionManager::activate(const ServerData& serverData,
               setState(StateConnecting);
 
               clearRetryCounter();
-              activateInternal(DoNotForceDNSPort, serverSelectionPolicy);
+              activateInternal(DoNotForceDNSPort, serverSelectionPolicy,
+                               protectWholeDevice);
             });
 
     connect(request, &NetworkRequest::requestCompleted, this,
-            [this, serverSelectionPolicy](const QByteArray& data) {
+            [this, serverSelectionPolicy,
+             protectWholeDevice](const QByteArray& data) {
               MozillaVPN::instance()->accountChecked(data);
               setState(StateConnecting);
 
               clearRetryCounter();
-              activateInternal(DoNotForceDNSPort, serverSelectionPolicy);
+              activateInternal(DoNotForceDNSPort, serverSelectionPolicy,
+                               protectWholeDevice);
             });
 
     connect(request, &QObject::destroyed, task, &QObject::deleteLater);
@@ -983,7 +1002,8 @@ bool ConnectionManager::activate(const ServerData& serverData,
   }
 
   clearRetryCounter();
-  activateInternal(DoNotForceDNSPort, serverSelectionPolicy);
+  activateInternal(DoNotForceDNSPort, serverSelectionPolicy,
+                   protectWholeDevice);
   return true;
 }
 
@@ -1013,6 +1033,7 @@ bool ConnectionManager::deactivate() {
     setState(StateDisconnecting);
   }
 
+  m_protectWholeDevice = true;
   m_pingCanary.stop();
   m_handshakeTimer.stop();
   m_activationQueue.clear();

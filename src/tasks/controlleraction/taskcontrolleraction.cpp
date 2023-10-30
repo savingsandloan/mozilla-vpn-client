@@ -53,7 +53,10 @@ void TaskControllerAction::run() {
     case eActivate:
       expectSignal = connectionManager->activate(m_serverData);
       break;
-
+    case eActivateExtensionOnly:
+      expectSignal = connectionManager->activate(
+          m_serverData, ConnectionManager::RandomizeServerSelection, false);
+      break;
     case eDeactivate:
       expectSignal = connectionManager->deactivate();
       break;

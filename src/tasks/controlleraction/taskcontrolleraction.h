@@ -22,6 +22,7 @@ class TaskControllerAction final : public Task {
  public:
   enum TaskAction {
     eActivate,
+    eActivateExtensionOnly,
     eDeactivate,
     eSilentSwitch,
     eSwitch,

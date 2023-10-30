@@ -116,7 +116,8 @@ class ConnectionManager : public QObject, public LogSerializer {
   // be emitted at the end of the operation.
   bool activate(
       const ServerData& serverData,
-      ServerSelectionPolicy serverSelectionPolicy = RandomizeServerSelection);
+      ServerSelectionPolicy serverSelectionPolicy = RandomizeServerSelection,
+      bool protectWholeDevice = true);
   bool deactivate();
 
   Q_INVOKABLE void quit();
@@ -172,7 +173,8 @@ class ConnectionManager : public QObject, public LogSerializer {
   ~ConnectionManager();
 
   void initialize();
-  static QList<IPAddress> getAllowedIPAddressRanges(const Server& server);
+  static QList<IPAddress> getAllowedIPAddressRanges(
+      const Server& server, bool protectWholeDevice = false);
 
   enum ServerCoolDownPolicyForSilentSwitch {
     eServerCoolDownNeeded,
@@ -200,7 +202,8 @@ class ConnectionManager : public QObject, public LogSerializer {
   };
 
   void activateInternal(DNSPortPolicy dnsPort,
-                        ServerSelectionPolicy serverSelectionPolicy);
+                        ServerSelectionPolicy serverSelectionPolicy,
+                        bool protectWholeDevice);
 
   void clearConnectedTime();
   void clearRetryCounter();
@@ -247,6 +250,7 @@ class ConnectionManager : public QObject, public LogSerializer {
   PingHelper m_pingCanary;
   bool m_pingReceived = false;
   bool m_connectedBeforeTransaction = false;
+  bool m_protectWholeDevice = true;
 
   ServerSelectionPolicy m_nextServerSelectionPolicy = RandomizeServerSelection;
 
