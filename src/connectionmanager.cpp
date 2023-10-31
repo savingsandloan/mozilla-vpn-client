@@ -1007,6 +1007,8 @@ bool ConnectionManager::activate(const ServerData& serverData,
 
     connect(request, &QObject::destroyed, task, &QObject::deleteLater);
     return true;
+  } else if (m_state == ConnectionManager::StateOnPartial) {
+    setState(StateConnecting);
   }
 
   clearRetryCounter();
