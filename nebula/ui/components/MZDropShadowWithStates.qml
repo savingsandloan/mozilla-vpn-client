@@ -33,7 +33,8 @@ MZDropShadow {
         },
         State {
             name: "off"
-            when: (state === VPNController.StateDisconnecting ||
+            when: (state === VPNController.StateOnPartial ||
+                   state === VPNController.StateDisconnecting ||
                    state === VPNController.StateOff)
             PropertyChanges {
                 target: dropShadow

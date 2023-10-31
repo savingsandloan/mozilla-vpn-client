@@ -149,7 +149,8 @@ int CommandStatus::run(QStringList& tokens) {
       case ConnectionManager::StateConfirming:
         stream << "confirming";
         break;
-
+      case ConnectionManager::StateOnPartial:
+        [[fallthrough]];
       case ConnectionManager::StateOn:
         [[fallthrough]];
       case ConnectionManager::StateSilentSwitching:

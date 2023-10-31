@@ -123,6 +123,11 @@ QJsonObject serializeStatus() {
 
   {
     ConnectionManager::State state = vpn->connectionManager()->state();
+    if (state == ConnectionManager::StateOnPartial) {
+      state =
+          ConnectionManager::StateOn;  // Old extensions like MAC dont know and
+                                       // dont need to know about this state.
+    }
     const QMetaObject* meta = qt_getEnumMetaObject(state);
     int index = meta->indexOfEnumerator(qt_getEnumName(state));
     obj["vpn"] = meta->enumerator(index).valueToKey(state);

@@ -81,6 +81,67 @@ MZFlickable {
             id: box
             z: 1
         }
+        Rectangle{
+            id: extensionBox
+            visible: VPNController.state === VPNController.StateOnPartial
+            onVisibleChanged: if (visible) fadeDown.start()
+            anchors.left: box.left
+            anchors.right: box.right
+            anchors.top: box.bottom
+            anchors.topMargin: -MZTheme.theme.windowMargin
+            height: 50
+            color: MZTheme.colors.primary
+            radius: MZTheme.theme.cornerRadius * 2
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: MZTheme.theme.windowMargin
+                anchors.leftMargin: MZTheme.theme.windowMargin*1.5
+                anchors.rightMargin: MZTheme.theme.windowMargin*1.5
+                
+                Image {
+                    id: insetIcon
+                    source: "qrc:/ui/resources/shield-on.svg"
+                    sourceSize.height: 32
+                    sourceSize.width: 32
+                    opacity: 1
+                }
+                Text{
+                    color: "white"
+                    text: "Firefox is using vpn"
+                }
+                MZIcon {
+                    source: "qrc:/nebula/resources/close-white.svg"
+                    sourceSize.height: 18
+                    sourceSize.width: 18
+                    //onClicked: VPN.deactivate();
+                    
+                }
+            }
+            ParallelAnimation {
+                id: fadeDown
+
+                PropertyAnimation {
+                    target: extensionBox
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: 200
+                }
+
+                PropertyAnimation {
+                    target: extensionBox
+                    property: "anchors.topMargin"
+                    from: -100
+                    to: -MZTheme.theme.windowMargin
+                    duration: 400
+                }
+
+            }
+        }
+       
+
 
         ControllerNav {
             function handleClick() {

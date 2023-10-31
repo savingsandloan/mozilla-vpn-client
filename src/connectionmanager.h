@@ -57,6 +57,7 @@ class ConnectionManager : public QObject, public LogSerializer {
     StateConnecting,
     StateConfirming,
     StateOn,
+    StateOnPartial,
     StateDisconnecting,
     StateSilentSwitching,
     StateSwitching,
@@ -174,7 +175,7 @@ class ConnectionManager : public QObject, public LogSerializer {
 
   void initialize();
   static QList<IPAddress> getAllowedIPAddressRanges(
-      const Server& server, bool protectWholeDevice = false);
+      const Server& server, bool protectWholeDevice = true);
 
   enum ServerCoolDownPolicyForSilentSwitch {
     eServerCoolDownNeeded,

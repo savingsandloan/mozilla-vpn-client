@@ -221,7 +221,7 @@ qint64 ConnectionManager::time() const {
 }
 
 void ConnectionManager::timerTimeout() {
-  Q_ASSERT(m_state == StateOn);
+  Q_ASSERT(m_state == StateOn || m_state == StateOnPartial);
 #ifdef MZ_IOS
   // When locking an iOS device with an app in the foreground, the app's JS
   // runtime is stopped pretty quick by the system. For this VPN app, that
@@ -248,9 +248,9 @@ void ConnectionManager::quit() {
 
   m_nextStep = Quit;
 
-  if (m_state == StateOn || m_state == StateSwitching ||
-      m_state == StateSilentSwitching || m_state == StateConnecting ||
-      m_state == StateCheckSubscription) {
+  if (m_state == StateOn || m_state == StateOnPartial ||
+      m_state == StateSwitching || m_state == StateSilentSwitching ||
+      m_state == StateConnecting || m_state == StateCheckSubscription) {
     deactivate();
     return;
   }
@@ -311,9 +311,10 @@ void ConnectionManager::serverUnavailable() {
 
   m_nextStep = ServerUnavailable;
 
-  if (m_state == StateOn || m_state == StateSwitching ||
-      m_state == StateSilentSwitching || m_state == StateConnecting ||
-      m_state == StateConfirming || m_state == StateCheckSubscription) {
+  if (m_state == StateOn || m_state == StateOnPartial ||
+      m_state == StateSwitching || m_state == StateSilentSwitching ||
+      m_state == StateConnecting || m_state == StateConfirming ||
+      m_state == StateCheckSubscription) {
     deactivate();
     return;
   }
@@ -329,7 +330,7 @@ void ConnectionManager::updateRequired() {
 
   m_nextStep = Update;
 
-  if (m_state == StateOn) {
+  if (m_state == StateOn || m_state == StateOnPartial) {
     deactivate();
     return;
   }
@@ -346,7 +347,7 @@ void ConnectionManager::logout() {
 
   m_nextStep = Disconnect;
 
-  if (m_state == StateOn) {
+  if (m_state == StateOn || m_state == StateOnPartial) {
     deactivate();
     return;
   }
@@ -389,7 +390,8 @@ void ConnectionManager::activateInternal(
   exitConfig.m_serverIpv4AddrIn = exitServer.ipv4AddrIn();
   exitConfig.m_serverIpv6AddrIn = exitServer.ipv6AddrIn();
   exitConfig.m_serverPort = exitServer.choosePort();
-  exitConfig.m_allowedIPAddressRanges = getAllowedIPAddressRanges(exitServer);
+  exitConfig.m_allowedIPAddressRanges =
+      getAllowedIPAddressRanges(exitServer, protectWholeDevice);
   exitConfig.m_dnsServer = DNSHelper::getDNS(exitServer.ipv4Gateway());
 #if defined(MZ_ANDROID) || defined(MZ_IOS)
   exitConfig.m_installationId = settingsHolder->installationId();
@@ -691,7 +693,11 @@ void ConnectionManager::connected(const QString& pubkey,
 
   // We have succesfully completed all pending connections.
   logger.debug() << "Connected from state:" << m_state;
-  setState(StateOn);
+  if (m_protectWholeDevice) {
+    setState(StateOn);
+  } else {
+    setState(StateOnPartial);
+  }
   emit newConnectionSucceeded();
 
   // In case the Controller provided a valid timestamp that
@@ -905,9 +911,10 @@ void ConnectionManager::backendFailure() {
 
   m_nextStep = BackendFailure;
 
-  if (m_state == StateOn || m_state == StateSwitching ||
-      m_state == StateSilentSwitching || m_state == StateConnecting ||
-      m_state == StateCheckSubscription || m_state == StateConfirming) {
+  if (m_state == StateOn || m_state == StateOnPartial ||
+      m_state == StateSwitching || m_state == StateSilentSwitching ||
+      m_state == StateConnecting || m_state == StateCheckSubscription ||
+      m_state == StateConfirming) {
     deactivate();
     return;
   }
@@ -928,7 +935,8 @@ bool ConnectionManager::activate(const ServerData& serverData,
                                  ServerSelectionPolicy serverSelectionPolicy,
                                  bool protectWholeDevice) {
   logger.debug() << "Activation" << m_state;
-  if (m_state != ConnectionManager::StateOff &&
+  if (m_state != ConnectionManager::StateOnPartial &&
+      m_state != ConnectionManager::StateOff &&
       m_state != ConnectionManager::StateSwitching &&
       m_state != ConnectionManager::StateSilentSwitching) {
     logger.debug() << "Already connected";
@@ -1010,9 +1018,10 @@ bool ConnectionManager::activate(const ServerData& serverData,
 bool ConnectionManager::deactivate() {
   logger.debug() << "Deactivation" << m_state;
 
-  if (m_state != StateOn && m_state != StateSwitching &&
-      m_state != StateSilentSwitching && m_state != StateConfirming &&
-      m_state != StateConnecting && m_state != StateCheckSubscription) {
+  if (m_state != StateOn && m_state != StateOnPartial &&
+      m_state != StateSwitching && m_state != StateSilentSwitching &&
+      m_state != StateConfirming && m_state != StateConnecting &&
+      m_state != StateCheckSubscription) {
     logger.warning() << "Already disconnected";
     return false;
   }
@@ -1028,8 +1037,9 @@ bool ConnectionManager::deactivate() {
     m_portalDetected = false;
   }
 
-  if (m_state == StateOn || m_state == StateConfirming ||
-      m_state == StateConnecting || m_state == StateCheckSubscription) {
+  if (m_state == StateOn || m_state == StateOnPartial ||
+      m_state == StateConfirming || m_state == StateConnecting ||
+      m_state == StateCheckSubscription) {
     setState(StateDisconnecting);
   }
 
