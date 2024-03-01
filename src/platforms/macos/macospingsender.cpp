@@ -111,7 +111,7 @@ void MacOSPingSender::socketReady() {
   iov.iov_len = IP_MAXPACKET;
 
   ssize_t rc = recvmsg(m_socket, &msg, MSG_DONTWAIT);
-  if (rc <= 0) {
+  if (rc == 0 || rc == -1) {
     logger.error() << "Recvmsg failed:" << rc;
     return;
   }
