@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM ubuntu:22.04
+FROM $DOCKER_BASE_IMAGE
 
 # Add worker user
 RUN mkdir /builds && \
@@ -40,6 +40,7 @@ RUN apt-get update -qq \
                           curl \
                           rpm \
                           libglib2.0-0 \
+                          libdbus-1-dev \ 
                           ccache \
     && apt-get clean
 

@@ -23,6 +23,12 @@ tasks:
 #                                  taskcluster binary's to run shell tasks and etc fun stuff.
     base:
         symbol: I(base)
+        args:
+            DOCKER_BASE_IMAGE: ubuntu:22.04
+    debian-base:
+        symbol: I(base)
+        args:
+            DOCKER_BASE_IMAGE: debian:bullseye
     conda-base:
         parent: base
         symbol: I(conda-base)

@@ -8,13 +8,22 @@
 
 POSITIONAL=()
 JOBS=8
+BUILDDIR=
 
 helpFunction() {
   print G "Usage:"
   print N "\t$0 <QT_source_folder> <destination_folder> [-j|--jobs <jobs>] [anything else will be use as argument for the QT configure script]"
   print N ""
+  print N "Build options:"
+  print N "  -j, --jobs NUM   Parallelize build across NUM processes. (default: 8)"
+  print N "  -b, --build DIR  Build in DIR. (default: <QT_source_folder>/build)"
+  print N "  -h, --help       Display this message and exit."
+  print N ""
+  print N "Any other arguments will be passed to the Qt configure script."
+  exit 0
   exit 0
 }
+
 
 print N "This script compiles Qt6 statically"
 print N ""
@@ -25,6 +34,11 @@ while [[ $# -gt 0 ]]; do
   case $key in
   -j | --jobs)
     JOBS="$2"
+    shift
+    shift
+    ;;
+  -b | --build)
+    BUILDDIR="$2"
     shift
     shift
     ;;
@@ -45,7 +59,7 @@ if [[ $# -lt 2 ]]; then
 fi
 
 [ -d "$1" ] || die "Unable to find the QT source folder."
-
+SRCDIR=$(cd $1 && pwd)
 cd "$1" || die "Unable to enter into the QT source folder"
 
 shift
@@ -53,12 +67,18 @@ shift
 PREFIX=$1
 shift
 
+if [[ -z "$BUILDDIR" ]]; then
+  BUILDDIR=$SRCDIR/build
+fi
+
+
 printn Y "Cleaning the folder... "
 make distclean -j $JOBS &>/dev/null;
 print G "done."
 
 LINUX="
   -platform linux-clang \
+  -openssl-linked \
   -egl \
   -opengl es2 \
   -no-icu \
@@ -66,6 +86,9 @@ LINUX="
   -bundled-xcb-xinput \
   -feature-qdbus \
   -xcb \
+  -- \
+  -DOPENSSL_USE_STATIC_LIBS=ON  \
+  -DCMAKE_SYSROOT= 
 "
 
 MACOS="
@@ -98,8 +121,14 @@ rm -rf qttools/src/linguist/linguist
 mkdir qttools/src/linguist/linguist
 echo "return()" > qttools/src/linguist/linguist/CMakeLists.txt
 
+# Create the installation prefix, and convert to an absolute path.
+mkdir -p $PREFIX
+mkdir -p $BUILDDIR
+PREFIX=(cd $PREFIX && pwd)
+
+
 print Y "Wait..."
-bash ./configure \
+(cd $BUILDDIR && bash $SRCDIR/configure \
   $* \
   --prefix=$PREFIX \
   -opensource \
@@ -165,6 +194,7 @@ bash ./configure \
   -skip qtspeech  \
   -skip qtvirtualkeyboard  \
   -skip qtweb \
+  -skip qtwebview \
   -feature-imageformat_png \
   -feature-optimize_full \
   -feature-xml \
@@ -173,12 +203,12 @@ bash ./configure \
   -qt-zlib \
   -qt-pcre \
   -qt-freetype \
-  $PLATFORM || die "Configuration error."
+  $PLATFORM) || die "Configuration error."
 
 print Y "Compiling..."
-cmake --build . --parallel $JOBS || die "Make failed"
+cmake --build $BUILDDIR --parallel $JOBS || die "Make failed"
 
 print Y "Installing..."
-cmake --install . || die "Make install failed"
+cmake --install $BUILDDIR || die "Make install failed"
 
 print G "All done!"
