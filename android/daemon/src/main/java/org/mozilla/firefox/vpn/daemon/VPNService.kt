@@ -137,12 +137,18 @@ class VPNService : android.net.VpnService() {
         initializeGlean(Prefs.get(this).getBoolean("glean_enabled", false))
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        Log.v(tag, "MATT WE WERE CREATED")
+    }
+
     override fun onUnbind(intent: Intent?): Boolean {
         if (!isUp) {
             Log.v(tag, "Client Disconnected, VPN is down - Service might shut down soon")
-            return super.onUnbind(intent)
+        } else {
+            Log.v(tag, "Client Disconnected, VPN is up")
         }
-        Log.v(tag, "Client Disconnected, VPN is up")
+        stopSelf()
         return super.onUnbind(intent)
     }
 
@@ -171,12 +177,13 @@ class VPNService : android.net.VpnService() {
      * Always-On-Vpn from Settings or from Booting the device and having "connect on boot" enabled.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(tag, "MATT STARTING SERVICE IN ONSTARTCOMMAND")
         Log.i(tag, "Service Started by Intent")
         init()
         if (isUp) {
             // In case a user has "always-on" and "start-on-boot" enabled, we might
             // get this multiple times.
-            return START_NOT_STICKY
+            return START_STICKY
         }
         intent?.let {
             if (intent.getBooleanExtra("startOnly", false)) {
@@ -185,7 +192,7 @@ class VPNService : android.net.VpnService() {
                 // bind to the service anyway.
                 // We should return START_NOT_STICKY so that after an unbind()
                 // the OS will not try to restart the service.
-                return START_NOT_STICKY
+                return START_STICKY
             }
         }
         // This start is from always-on
@@ -196,7 +203,8 @@ class VPNService : android.net.VpnService() {
             if (lastConfString.isNullOrEmpty()) {
                 // We have nothing to connect to -> Exit
                 Log.e(tag, "VPN service was triggered without defining a Server or having a tunnel")
-                return super.onStartCommand(intent, flags, startId)
+                val blah = super.onStartCommand(intent, flags, startId)
+                return START_STICKY
             }
             this.mConfig = JSONObject(lastConfString)
         }
@@ -208,7 +216,8 @@ class VPNService : android.net.VpnService() {
             Log.stack(tag, error.stackTrace)
         }
 
-        return super.onStartCommand(intent, flags, startId)
+        val blah = super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     // Invoked when the application is revoked.
