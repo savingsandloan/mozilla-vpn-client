@@ -1,0 +1,241 @@
+{
+  "identifier" : "B82712A8",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1489407738",
+    "_developerTeamID" : "43AQ936H96",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 747254719.06974697,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "20693686",
+      "localizations" : [
+
+      ],
+      "name" : "Renewable Subscription Group",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+            {
+              "eligibility" : [
+                "expired",
+                "new",
+                "existing"
+              ],
+              "internalID" : "E1D7E859",
+              "isStackable" : true,
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "referenceName" : "TestingForQA",
+              "subscriptionPeriod" : "P1M"
+            }
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "1535000371",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "VPN-maandabonnement",
+              "displayName" : "VPN-maandabonnement",
+              "locale" : "nl"
+            },
+            {
+              "description" : "Suscripción VPN mensual",
+              "displayName" : "Suscripción VPN mensual",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Abbonamento mensile VPN",
+              "displayName" : "Abbonamento mensile VPN",
+              "locale" : "it"
+            },
+            {
+              "description" : "Abonnement VPN mensuel",
+              "displayName" : "Abonnement VPN mensuel",
+              "locale" : "fr"
+            },
+            {
+              "description" : "Monatliches VPN-Abonnement",
+              "displayName" : "Monatliches VPN-Abonnement",
+              "locale" : "de"
+            },
+            {
+              "description" : "Monthly VPN Subscription",
+              "displayName" : "Monthly VPN Subscription",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "org.mozilla.ios.FirefoxVPN.product.1_month_subscription",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "1 Month Subscription",
+          "subscriptionGroupID" : "20693686",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "59.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1572785118",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "1 Year VPN Subscription",
+              "displayName" : "1 Year VPN Subscription",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Abonnement de 12 mois",
+              "displayName" : "Abonnement de 12 mois",
+              "locale" : "fr"
+            },
+            {
+              "description" : "12-Monats-Abo",
+              "displayName" : "12-Monats-Abo",
+              "locale" : "de"
+            },
+            {
+              "description" : "1 jaar VPN-abonnement",
+              "displayName" : "1 jaar VPN-abonnement",
+              "locale" : "nl"
+            },
+            {
+              "description" : "Suscripción VPN 1 año",
+              "displayName" : "Suscripción VPN 1 año",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Abbonamento 1 anno VPN",
+              "displayName" : "Abbonamento 1 anno VPN",
+              "locale" : "it"
+            }
+          ],
+          "productID" : "org.mozilla.ios.FirefoxVPN.product.1_year_subscription",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "1 Year Subscription",
+          "subscriptionGroupID" : "20693686",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "47.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1572783855",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "6 Month VPN Subscription",
+              "displayName" : "6 Month VPN Subscription",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Abonnement de 6 mois",
+              "displayName" : "Abonnement de 6 mois",
+              "locale" : "fr"
+            },
+            {
+              "description" : "Abbonamento 6 mesi VPN",
+              "displayName" : "Abbonamento 6 mesi VPN",
+              "locale" : "it"
+            },
+            {
+              "description" : "6-Monats-Abo",
+              "displayName" : "6-Monats-Abo",
+              "locale" : "de"
+            },
+            {
+              "description" : "Suscripción VPN 6 meses",
+              "displayName" : "Suscripción VPN 6 meses",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "6 maanden VPN-abonnement",
+              "displayName" : "6 maanden VPN-abonnement",
+              "locale" : "nl"
+            }
+          ],
+          "productID" : "org.mozilla.ios.FirefoxVPN.product.6_mo_subscription",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "6 Month Subscription",
+          "subscriptionGroupID" : "20693686",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

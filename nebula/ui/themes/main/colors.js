@@ -127,10 +127,6 @@ color.washedBlue = '#D4E2F6';
 color.washedLightBlue = '#AECBF2';
 color.strongBlue = '#0A84FF';
 
-color.customGradientColorPurple = '#9D62FC';
-color.customGradientColorPink = '#FD3296';
-color.customGradientColorBlue = '#5B6DF8';
-
 color.onboardingGradientStart = '#472C87';
 color.onboardingGradientMiddle = '#301962';
 color.onboardingGradientEnd = '#1D0942';
@@ -160,8 +156,6 @@ const addTransparency = (hexColor, percent) => {
 
 color.bgColor = color.grey5;
 color.bgColor30 = addTransparency(color.grey5, 0.3);
-color.bgColor80 = addTransparency(color.grey5, 0.3);
-color.bgColorTransparent = addTransparency(color.grey5, 0.0);
 
 color.blue = color.blue50;
 color.blueHovered = color.blue60;
@@ -196,8 +190,6 @@ color.blueBadgeBackground = addTransparency(color.blue50, 0.4);
 
 color.overlayBackground = addTransparency(color.black, 0.0);
 
-color.checkBoxWarning = color.yellow70;
-
 color.fontColor = color.grey40;
 color.fontColorDark = color.grey50;
 
@@ -208,9 +200,6 @@ color.lightFocusBorder = color.grey15;
  * Main palette
  */
 color.primary = color.purple90;
-color.secondary = color.green50;
-color.dark = color.grey60;
-color.light = color.grey5;
 
 /**
  * Functional
@@ -234,102 +223,30 @@ color.yellowFocus = color.orange10;
 
 color.informational = {
   default: color.blue,
-  active: color.blueActive,
-  hover: color.blueHover,
+  active: color.blueActive,  // COULD REMOVE
+  hover: color.blueHover,    // COULD REMOVE
   focus: color.blueFocus,
 };
 
 color.success = {
   default: color.green,
-  active: color.greenActive,
-  hover: color.greenHover,
-  focus: color.greenFocus,
+  active: color.greenActive,  // COULD REMOVE
+  hover: color.greenHover,    // COULD REMOVE
+  focus: color.greenFocus,    // COULD REMOVE
 };
 
 color.error = {
   default: color.red50,
-  active: color.redActive,
-  hover: color.redHover,
+  active: color.redActive,  // COULD REMOVE
+  hover: color.redHover,    // COULD REMOVE
   focus: color.redFocus,
 };
 
 color.warning = {
   default: color.yellow,
   active: color.yellowActive,
-  hover: color.yellowHover,
-  focus: color.yellowFocus,
-};
-
-/**
- * Gradients
- */
-
-// Pink gradient
-color.gradientPink = {
-  type: 'radial',
-  stops: [
-    {
-      position: 0.0,
-      color: color.customGradientColorPurple,
-    },
-    {
-      position: 0.0,
-      color: color.customGradientColorPink,
-    },
-  ],
-};
-
-// Blue gradient
-color.gradientBlue = {
-  type: 'radial',
-  stops: [
-    {
-      position: 0.0,
-      color: color.violet50,
-    },
-    {
-      position: 0.371,
-      color: color.purple50,
-    },
-    {
-      position: 0.614,
-      color: color.customGradientColorBlue,
-    },
-    {
-      position: 1.0,
-      color: color.blue40,
-    },
-  ],
-};
-
-// Orange gradient
-color.gradientOrange = {
-  type: 'radial',
-  stops: [
-    {
-      position: 0.0,
-      color: color.red60,
-    },
-    {
-      position: 1.0,
-      color: color.yellow50,
-    },
-  ],
-};
-
-// Green gradient
-color.gradientGreen = {
-  type: 'radial',
-  stops: [
-    {
-      position: 0.0,
-      color: color.blue50,
-    },
-    {
-      position: 1.0,
-      color: color.green50,
-    },
-  ],
+  hover: color.yellowHover,  // COULD REMOVE
+  focus: color.yellowFocus,  // COULD REMOVE
 };
 
 /**
@@ -337,33 +254,28 @@ color.gradientGreen = {
  */
 color.inputState = {
   default: {
-    background: color.white,
     border: color.grey30,
     placeholder: color.grey40,
     text: color.grey50,
   },
   hover: {
-    background: color.white,
     border: color.grey40,
     placeholder: color.grey50,
     text: color.grey50,
   },
   focus: {
-    background: color.white,
     border: color.informational.default,
     highlight: color.informational.focus,
     placeholder: color.grey40,
     text: color.grey50,
   },
   error: {
-    background: color.white,
     border: color.error.default,
     highlight: color.error.focus,
     placeholder: color.grey40,
     text: color.grey50,
   },
   disabled: {
-    background: color.white,
     border: color.grey20,
     placeholder: color.grey20,
     text: color.grey20,
@@ -405,24 +317,24 @@ color.clickableRowBlue = {
   defaultColor: color.bgColor,
   buttonHovered: color.washedBlue,
   buttonPressed: color.washedLightBlue,
-  focusOutline: color.bgColorTransparent,
+  focusOutline: color.transparent,
   focusBorder: color.blueFocusBorder,
 };
 
 color.clickableRowPurple = {
-  defaultColor: color.bgColorTransparent,
+  defaultColor: color.transparent,
   buttonHovered: color.purple5,
   buttonPressed: color.purple10,
-  focusOutline: color.bgColorTransparent,
+  focusOutline: color.transparent,
   focusBorder: color.purple70,
 };
 
 color.iconButtonLightBackground = {
-  defaultColor: color.bgColorTransparent,
+  defaultColor: color.transparent,
   buttonHovered: color.greyHovered,
   buttonPressed: color.greyPressed,
   buttonDisabled: color.transparent,
-  focusOutline: color.bgColorTransparent,
+  focusOutline: color.transparent,
   focusBorder: color.darkFocusBorder,
 };
 
@@ -436,12 +348,12 @@ color.iconButtonDarkBackground = {
 };
 
 color.linkButton = {
-  defaultColor: color.bgColorTransparent,
-  buttonHovered: color.bgColorTransparent,
-  buttonPressed: color.bgColorTransparent,
-  buttonDisabled: color.bgColorTransparent,
-  focusOutline: color.bgColorTransparent,
-  focusBorder: color.bgColorTransparent,
+  defaultColor: color.transparent,
+  buttonHovered: color.transparent,
+  buttonPressed: color.transparent,
+  buttonDisabled: color.transparent,
+  focusOutline: color.transparent,
+  focusBorder: color.transparent,
 };
 
 color.whiteButton = {
@@ -480,11 +392,11 @@ color.redLinkButton = {
 };
 
 color.removeDeviceBtn = {
-  defaultColor: color.bgColorTransparent,
+  defaultColor: color.transparent,
   buttonHovered: color.red5,
   buttonPressed: color.red10,
-  buttonDisabled: color.bgColorTransparent,
-  focusOutline: color.bgColorTransparent,
+  buttonDisabled: color.transparent,
+  focusOutline: color.transparent,
   focusBorder: color.red,
 };
 
@@ -509,8 +421,8 @@ color.card = {
   defaultColor: color.white,
   buttonHovered: color.greyHovered,
   buttonPressed: color.greyPressed,
-  buttonDisabled: color.bgColorTransparent,
-  focusOutline: color.bgColorTransparent,
+  buttonDisabled: color.transparent,
+  focusOutline: color.transparent,
   focusBorder: color.darkFocusBorder,
 };
 
@@ -568,8 +480,8 @@ color.purpleStepProgressBarDelegate = {
   buttonHovered: color.purple70,
   buttonPressed: color.purple80,
   buttonDisabled: color.grey30,
-  focusOutline: color.bgColorTransparent,
-  focusBorder: color.bgColorTransparent,
+  focusOutline: color.transparent,
+  focusBorder: color.transparent,
 };
 
 color;
