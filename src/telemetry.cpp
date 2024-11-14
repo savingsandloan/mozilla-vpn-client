@@ -19,6 +19,10 @@
 #include "purchasehandler.h"
 #include "settingsholder.h"
 
+#ifdef MZ_WINDOWS
+#  include "interventions/killernetwork.h"
+#endif
+
 #if defined(MZ_ANDROID)
 #  include "platforms/android/androidvpnactivity.h"
 #endif
@@ -83,6 +87,11 @@ void Telemetry::initialize() {
       m_connectionStabilityTimer.start(CONNECTION_STABILITY);
     }
   });
+
+#ifdef MZ_WINDOWS
+  mozilla::glean::sample::killer_network_detected.set(
+      Intervention::KillerNetwork::systemAffected());
+#endif
 
   connect(
       SettingsHolder::instance(), &SettingsHolder::startAtBootChanged, this,

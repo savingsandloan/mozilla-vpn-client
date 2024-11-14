@@ -400,6 +400,24 @@ sample:
           Which server changed:
           multiHopEntryServer | multiHopExitServer | singleHopServer
         type: string
+  killer_network_detected:
+    type: boolean
+    lifetime: ping
+    send_in_pings:
+      - main
+    description: |
+      The Conflicting Service 'Killer network' is detected
+    bugs:
+      - https://mozilla-hub.atlassian.net/browse/VPN-6606
+    data_reviews:
+      - TBA
+    data_sensitivity:
+      - technical
+    notification_emails:
+      - sstreich@mozilla.com
+      - vpn-telemetry@mozilla.com
+    expires: 2025-06-30
+
 
 performance:
   time_to_main_screen:
@@ -1057,3 +1075,4 @@ connection_health:
       - mcleinman@mozilla.com
       - vpn-telemetry@mozilla.com
     expires: 2024-12-31
+  
