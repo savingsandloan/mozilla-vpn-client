@@ -4,6 +4,9 @@
 
 #include "webextensionadapter.h"
 
+#include <qjsonarray.h>
+#include <qjsonobject.h>
+
 #include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -31,6 +34,10 @@
 #include "tasks/controlleraction/taskcontrolleraction.h"
 #include "taskscheduler.h"
 #include "webextensionadapter.h"
+
+#ifdef MZ_WINDOWS
+#  include "interventions/killernetwork.h"
+#endif
 
 namespace {
 
@@ -69,76 +76,86 @@ WebExtensionAdapter::WebExtensionAdapter(QObject* parent)
   mProxyStateChanged = vpn->proxyController()->stateBindable().subscribe(
       [this]() { serializeStatus(); });
 
-  m_commands = QList<RequestType>({
-      RequestType{"activate",
-                  [](const QJsonObject&) {
-                    auto t = new TaskControllerAction(
-                        TaskControllerAction::eActivateForExtension);
-                    TaskScheduler::scheduleTask(t);
-                    QJsonObject obj;
-                    obj["ok"] = true;
-                    return QJsonObject();
-                  }},
-      RequestType{"deactivate",
-                  [](const QJsonObject&) {
-                    auto t = new TaskControllerAction(
-                        TaskControllerAction::eDeactivateForExtension);
-                    TaskScheduler::scheduleTask(t);
-                    QJsonObject obj;
-                    obj["ok"] = true;
-                    return QJsonObject();
-                  }},
-      RequestType{"servers",
-                  [this](const QJsonObject&) {
-                    QJsonObject servers;
-                    serializeServerCountry(
-                        MozillaVPN::instance()->serverCountryModel(), servers);
+  m_commands = QList<RequestType>(
+      {RequestType{"activate",
+                   [](const QJsonObject&) {
+                     auto t = new TaskControllerAction(
+                         TaskControllerAction::eActivateForExtension);
+                     TaskScheduler::scheduleTask(t);
+                     QJsonObject obj;
+                     obj["ok"] = true;
+                     return QJsonObject();
+                   }},
+       RequestType{"deactivate",
+                   [](const QJsonObject&) {
+                     auto t = new TaskControllerAction(
+                         TaskControllerAction::eDeactivateForExtension);
+                     TaskScheduler::scheduleTask(t);
+                     QJsonObject obj;
+                     obj["ok"] = true;
+                     return QJsonObject();
+                   }},
+       RequestType{"servers",
+                   [this](const QJsonObject&) {
+                     QJsonObject servers;
+                     serializeServerCountry(
+                         MozillaVPN::instance()->serverCountryModel(), servers);
 
-                    QJsonObject obj;
-                    obj["servers"] = servers;
-                    return obj;
-                  }},
-      RequestType{"focus",
-                  [](const QJsonObject&) {
-                    QmlEngineHolder* engine = QmlEngineHolder::instance();
-                    engine->showWindow();
-                    return QJsonObject{};
-                  }},
-      RequestType{"openAuth",
-                  [](const QJsonObject&) {
-                    MozillaVPN* vpn = MozillaVPN::instance();
-                    if (vpn->state() != MozillaVPN::StateInitialize) {
-                      return QJsonObject{};
-                    }
-                    vpn->authenticate();
-                    return QJsonObject{};
-                  }},
-      RequestType{"disabled_apps",
-                  [](const QJsonObject&) {
-                    QJsonArray apps;
-                    for (const QString& app :
-                         SettingsHolder::instance()->vpnDisabledApps()) {
-                      apps.append(app);
-                    }
+                     QJsonObject obj;
+                     obj["servers"] = servers;
+                     return obj;
+                   }},
+       RequestType{"focus",
+                   [](const QJsonObject&) {
+                     QmlEngineHolder* engine = QmlEngineHolder::instance();
+                     engine->showWindow();
+                     return QJsonObject{};
+                   }},
+       RequestType{"openAuth",
+                   [](const QJsonObject&) {
+                     MozillaVPN* vpn = MozillaVPN::instance();
+                     if (vpn->state() != MozillaVPN::StateInitialize) {
+                       return QJsonObject{};
+                     }
+                     vpn->authenticate();
+                     return QJsonObject{};
+                   }},
+       RequestType{"disabled_apps",
+                   [](const QJsonObject&) {
+                     QJsonArray apps;
+                     for (const QString& app :
+                          SettingsHolder::instance()->vpnDisabledApps()) {
+                       apps.append(app);
+                     }
 
-                    QJsonObject obj;
-                    obj["disabled_apps"] = apps;
-                    return obj;
-                  }},
-      RequestType{"featurelist",
-                  [this](const QJsonObject&) {
-                    QJsonObject obj;
-                    obj["featurelist"] = serializeFeaturelist();
-                    return obj;
-                  }},
+                     QJsonObject obj;
+                     obj["disabled_apps"] = apps;
+                     return obj;
+                   }},
+       RequestType{"featurelist",
+                   [this](const QJsonObject&) {
+                     QJsonObject obj;
+                     obj["featurelist"] = serializeFeaturelist();
+                     return obj;
+                   }},
 
-      RequestType{"status",
-                  [this](const QJsonObject&) {
-                    QJsonObject obj;
-                    obj["status"] = serializeStatus();
-                    return obj;
-                  }},
-  });
+       RequestType{"status",
+                   [this](const QJsonObject&) {
+                     QJsonObject obj;
+                     obj["status"] = serializeStatus();
+                     return obj;
+                   }},
+       RequestType{"interventions", [](const QJsonObject&) {
+                     QJsonObject out;
+                     QJsonArray interventions;
+#ifdef MZ_WINDOWS
+                     if (Intervention::KillerNetwork::systemAffected()) {
+                       interventions.append(Intervention::KillerNetwork::id);
+                     }
+#endif
+                     out["interventions"] = interventions;
+                     return out;
+                   }}});
 }
 
 WebExtensionAdapter::~WebExtensionAdapter() {
