@@ -4,9 +4,6 @@
 
 #include "webextensionadapter.h"
 
-#include <qjsonarray.h>
-#include <qjsonobject.h>
-
 #include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -14,7 +11,6 @@
 #include <QMetaEnum>
 #include <QTcpSocket>
 #include <QWindow>
-#include <functional>
 
 #include "connectionhealth.h"
 #include "controller.h"
